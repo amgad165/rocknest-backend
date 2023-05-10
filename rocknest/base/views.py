@@ -49,6 +49,11 @@ def get_product(request, product_id):
     serializer = ProductSerializer(product)
     return JsonResponse(serializer.data)
 
+
+def index(request):
+    return render(request, 'index.html')
+
+
 def payment_form(request):
     return render(request, 'payment_form.html')
 
@@ -67,5 +72,5 @@ def create_order(request):
         print(order)
         return render(request, 'checkout.html', {'order': order})
     else:
-        return render(request, 'main.html', {'message': 'Failed to create order'})
+        return render(request, 'order.html', {'message': 'Failed to create order'})
         
