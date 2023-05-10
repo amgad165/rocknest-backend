@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <script src="https://checkout.revolut.com/checkout.js"></script>
+
+  </head>
+
+
+<body>
+	<!-- Add a button for the user to initiate payment -->
+	<button id="pay-button">Pay with Revolut</button>
+
+	<script>
+		// Define your public ID
+		var publicId = "YOUR_PUBLIC_ID_HERE";
+
+		// Initialize the Revolut Checkout widget
+		RevolutCheckout(publicId).then(function(RC) {
+			// Get a reference to the Pay button
+			var payButton = document.getElementById("pay-button");
+
+			// Attach a click event listener to the Pay button
+			payButton.addEventListener("click", function() {
+				// Open the payment pop-up
+				RC.payWithPopup({
+					// (mandatory!) name of the cardholder
+					name: "First Last",
+					// (optional) email of the customer
+					email: "customer@example.com",
+					// (optional) phone of the customer
+					phone: "+447950630319",
+					// (optional) billing address of the customer
+					billingAddress: {
+						countryCode: "GB",
+						region: "Greater London",
+						city: "London",
+						streetLine1: "Revolut",
+						streetLine2: "1 Canada Square",
+						postcode: "EC2V 6DN",
+					},
+					// (optional) shipping address of the customer
+					shippingAddress: {
+						countryCode: "GB",
+						region: "Greater London",
+						city: "London",
+						streetLine1: "Revolut",
+						streetLine2: "1 Canada Square",
+						postcode: "EC2V 6DN",
+					},
+					// Callback called when payment finished successfully
+					onSuccess: function() {
+						window.alert("Thank you for your payment!");
+						// Redirect the user to a success page
+						window.location.href = "/success/";
+					},
+					// Callback in case some error happened
+					onError: function(message) {
+						window.alert("Error: " + message);
+						// Redirect the user to an error page
+						window.location.href = "/error/";
+					},
+					// (optional) Callback in case user cancelled a transaction
+					onCancel: function() {
+						window.alert("Payment cancelled by user.");
+					}
+				});
+			});
+		});
+	</script>
+
+
+</body>
+
+
+
+
+
+</html>
