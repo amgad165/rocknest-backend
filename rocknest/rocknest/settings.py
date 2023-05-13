@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'base',
     'rest_framework',
     'drf_yasg',
+    'corsheaders',
 
 ]
 
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'rocknest.urls'
@@ -104,6 +106,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CORS_ALLOWED_ORIGINS = [
+     "http://localhost:3000", # your frontend domain
+     "http://127.0.0.1:3000", # your frontend domain
+ ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
