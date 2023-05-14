@@ -107,14 +107,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-     "http://localhost:3000", # your frontend domain
-     "http://127.0.0.1:3000", # your frontend domain
- ]
 
-CORS_ORIGIN_WHITELIST = [
-    '*',
-]
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Internationalization
