@@ -112,6 +112,10 @@ CORS_ALLOWED_ORIGINS = [
      "http://127.0.0.1:3000", # your frontend domain
  ]
 
+CORS_ORIGIN_WHITELIST = [
+    '*',
+]
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
