@@ -52,9 +52,23 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+# CORS_ALLOWED_ORIGINS = [
+#      "http://localhost:3000", # your frontend domain
+#      "http://127.0.0.1:3000", # your frontend domain
+
+#  ]
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+
+
 
 ROOT_URLCONF = 'rocknest.urls'
 
@@ -109,8 +123,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-CORS_ALLOW_ALL_ORIGINS = True
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -144,3 +156,10 @@ REVOLUT_MERCHANT_API_SECRET = 'sk_PzBrkzt70dWWVSyCj-KKSo7DjYs05LP9SzIXWKWssHg7zb
 
 # Revolut API endpoint
 REVOLUT_API_ENDPOINT = 'https://merchant.revolut.com/api/1.0'       
+
+
+
+
+
+
+

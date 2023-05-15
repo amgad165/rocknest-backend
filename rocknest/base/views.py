@@ -11,10 +11,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer
+from django.contrib.auth.models import User
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 # Create your views here.
+
 
 
 
@@ -30,6 +32,7 @@ def main(request):
 @api_view(['GET'])
 def product_list(request):
     products = Product.objects.all()
+    print('hi')
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -37,17 +40,20 @@ def product_list(request):
 @swagger_auto_schema(
     method='get',
     operation_description='Get a specific product by ID',
-    manual_parameters=[openapi.Parameter('product_id', openapi.IN_PATH, type=openapi.TYPE_INTEGER)],
     responses={
         200: openapi.Response('Product details', schema=ProductSerializer()),
         404: 'Product not found'
     }
 )
+
 @api_view(['GET'])
 def get_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     serializer = ProductSerializer(product)
+    
     return JsonResponse(serializer.data)
+
+
 
 
 def index(request):

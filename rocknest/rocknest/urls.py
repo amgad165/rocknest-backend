@@ -46,7 +46,8 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
  
     path('products/', views.product_list, name='product-list'),
-    path('products/<int:product_id>/', views.get_product, name='get_product'),
+    path('product/<int:product_id>/', views.get_product, name='get_product'),
+
     # path('download_html/', api_html, name='api_html'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
