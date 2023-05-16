@@ -48,6 +48,8 @@ urlpatterns = [
     path('products/', views.product_list, name='product-list'),
     path('product/<int:product_id>/', views.get_product, name='get_product'),
 
-    # path('download_html/', api_html, name='api_html'),
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login_view, name='login_view'),
+
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

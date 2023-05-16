@@ -12,6 +12,8 @@ from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer
 from django.contrib.auth.models import User
+from rest_framework import status
+from django.contrib.auth import authenticate, login
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -53,6 +55,83 @@ def get_product(request, product_id):
     
     return JsonResponse(serializer.data)
 
+@swagger_auto_schema(
+    method='POST',
+    operation_description='User sign up',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'email': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['username', 'email', 'password'],
+    ),
+    responses={
+        201: openapi.Response(description='User created successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+@api_view(['POST'])
+def signup(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    # Validate input data
+    if not username or not email or not password:
+        return Response({'error': 'Please provide all required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if username or email already exists
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Create the user
+    user = User.objects.create_user(username=username, email=email, password=password)
+
+    # Optionally, you can perform additional actions here, such as sending a confirmation email
+
+    return Response({'success': 'User created successfully'}, status=status.HTTP_201_CREATED)
+
+
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description='User login',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['username', 'password'],
+    ),
+    responses={
+        200: openapi.Response(description='Login successful'),
+        400: openapi.Response(description='Bad request'),
+        401: openapi.Response(description='Unauthorized'),
+    }
+)
+@api_view(['POST'])
+def login_view(request):
+    """
+    User login API endpoint.
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    # Authenticate user
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        # User is authenticated, log them in
+        login(request, user)
+        return Response({'success': 'Login successful'}, status=status.HTTP_200_OK)
+    else:
+        # User authentication failed
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 
