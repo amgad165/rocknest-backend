@@ -1,3 +1,4 @@
+from django.utils import timezone
 import hmac
 from django.shortcuts import get_object_or_404, render
 import requests
@@ -9,11 +10,12 @@ from django.http import JsonResponse
 import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product
+from .models import Order, OrderItem, Product
 from .serializers import ProductSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -54,6 +56,72 @@ def get_product(request, product_id):
     serializer = ProductSerializer(product)
     
     return JsonResponse(serializer.data)
+
+
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description='Add to cart',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+
+        },
+        required=['id'],
+    ),
+    responses={
+        201: openapi.Response(description='item added to cart successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+@api_view(['POST'])
+def add_to_cart(request):
+    id = request.data.get('id', None)
+
+
+    product = get_object_or_404(Product, id=id)
+
+
+    order_item_qs = OrderItem.objects.filter(
+        product=product,
+        user=request.user,
+        ordered=False
+    )
+
+
+    if order_item_qs.exists():
+        order_item = order_item_qs.first()
+        order_item.quantity += 1
+        order_item.save()
+    else:
+        order_item = OrderItem.objects.create(
+            product=product,
+            user=request.user,
+            ordered=False
+        )
+        order_item.save()
+
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if not order.items.filter(product__id=order_item.id).exists():
+            order.items.add(order_item)
+            return Response({'success': 'order quantity updated successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "Invalid request"}, status=HTTP_400_BAD_REQUEST)
+
+
+
+    else:
+        ordered_date = timezone.now()
+        order = Order.objects.create(
+            user=request.user, ordered_date=ordered_date)
+        order.items.add(order_item)
+        return Response({'success': 'added to cart successfully'}, status=status.HTTP_201_CREATED)
+
+
+
 
 @swagger_auto_schema(
     method='POST',
