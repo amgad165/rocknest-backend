@@ -11,7 +11,7 @@ import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Order, OrderItem, Product
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer , OrderSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
@@ -36,7 +36,6 @@ def main(request):
 @api_view(['GET'])
 def product_list(request):
     products = Product.objects.all()
-    print('hi')
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -56,6 +55,20 @@ def get_product(request, product_id):
     serializer = ProductSerializer(product)
     
     return JsonResponse(serializer.data)
+
+
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get list of all products in cart',
+    responses={200: openapi.Response('List of products in carts', schema=OrderSerializer(many=True))}
+)
+@api_view(['GET'])
+def cart_list(request):
+    order = Order.objects.get(user=request.user, ordered=False)
+    serializer = OrderSerializer(order)
+    return Response(serializer.data)
 
 
 
@@ -219,7 +232,7 @@ def login_view(request):
 
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'checkout.html')
 
 
 def payment_form(request):

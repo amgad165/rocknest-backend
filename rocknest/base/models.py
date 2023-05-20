@@ -25,6 +25,8 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return str(self.product) + ' - ' +str(self.image).split('/')[1]
+    
+
 class OrderItem(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE)
@@ -67,7 +69,7 @@ class Order(models.Model):
     def get_total(self):
         total = 0
         for order_item in self.items.all():
-            total += order_item.get_final_price()
+            total += order_item.get_total_item_price()
 
         return total
     
