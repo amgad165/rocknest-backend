@@ -14,11 +14,17 @@ class Product(models.Model):
     dimension = models.CharField(max_length=255)
     price = models.IntegerField()
     category = models.CharField(max_length=255,default='classic')
-    image = models.FileField(upload_to='product_images/') # new field
+    main_image = models.FileField(upload_to='product_images/')    
     
     def __str__(self):
         return self.name
+    
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.FileField(upload_to='product_images/')
 
+    def __str__(self):
+        return str(self.product) + ' - ' +str(self.image).split('/')[1]
 class OrderItem(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE)

@@ -66,6 +66,7 @@ def get_product(request, product_id):
         type=openapi.TYPE_OBJECT,
         properties={
             'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            'qty': openapi.Schema(type=openapi.TYPE_INTEGER),
 
         },
         required=['id'],
@@ -78,6 +79,7 @@ def get_product(request, product_id):
 @api_view(['POST'])
 def add_to_cart(request):
     id = request.data.get('id', None)
+    qty = request.data.get('qty', None)
 
 
     product = get_object_or_404(Product, id=id)
@@ -92,14 +94,25 @@ def add_to_cart(request):
 
     if order_item_qs.exists():
         order_item = order_item_qs.first()
-        order_item.quantity += 1
+        if qty:
+            order_item.quantity += qty
+        else:
+            order_item.quantity += 1
         order_item.save()
     else:
-        order_item = OrderItem.objects.create(
+        if qty:
+            order_item = OrderItem.objects.create(
             product=product,
             user=request.user,
-            ordered=False
-        )
+            ordered=False,
+            quantity=qty
+            )           
+        else:
+            order_item = OrderItem.objects.create(
+                product=product,
+                user=request.user,
+                ordered=False
+            )
         order_item.save()
 
     order_qs = Order.objects.filter(user=request.user, ordered=False)
