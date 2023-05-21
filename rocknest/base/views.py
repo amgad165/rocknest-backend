@@ -30,24 +30,24 @@ def main(request):
     return render(request,"main.html")
 
 
-@swagger_auto_schema(
-    method='get',
-    operation_description='Get user info',
-    responses={200: openapi.Response('User info', schema=UserSerializer)}
-)
-@api_view(['GET'])
-def get_user_info(request):
-    if request.user.is_authenticated:
-        user = request.user
-        # Customize the data you want to return about the user
-        data = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-        }
-        return Response(data)
-    else:
-        return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
+# @swagger_auto_schema(
+#     method='get',
+#     operation_description='Get user info',
+#     responses={200: openapi.Response('User info', schema=UserSerializer)}
+# )
+# @api_view(['GET'])
+# def get_user_info(request):
+#     if request.user.is_authenticated:
+#         user = request.user
+#         # Customize the data you want to return about the user
+#         data = {
+#             'id': user.id,
+#             'username': user.username,
+#             'email': user.email,
+#         }
+#         return Response(data)
+#     else:
+#         return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
 @swagger_auto_schema(
     method='get',
     operation_description='Get list of all products',
