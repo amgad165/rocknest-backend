@@ -11,11 +11,13 @@ import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Order, OrderItem, Product
-from .serializers import ProductSerializer , OrderSerializer,  UserSerializer
+from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -188,28 +190,24 @@ def add_to_cart(request):
 )
 @api_view(['POST'])
 def signup(request):
-    username = request.data.get('username')
-    email = request.data.get('email')
-    password = request.data.get('password')
+    serializer = UserRegisterationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
 
-    # Validate input data
-    if not username or not email or not password:
-        return Response({'error': 'Please provide all required fields'}, status=status.HTTP_400_BAD_REQUEST)
+    # Generate tokens
+    refresh_token = RefreshToken.for_user(user)
+    tokens = {
+        'refresh': str(refresh_token),
+        'access': str(refresh_token.access_token)
+    }
 
-    # Check if username or email already exists
-    if User.objects.filter(username=username).exists():
-        return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.filter(email=email).exists():
-        return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    # Prepare response data
+    data = {
+        'user': serializer.data,
+        'tokens': tokens
+    }
 
-    # Create the user
-    user = User.objects.create_user(username=username, email=email, password=password)
-
-    # Optionally, you can perform additional actions here, such as sending a confirmation email
-
-    return Response({'success': 'User created successfully'}, status=status.HTTP_201_CREATED)
-
-
+    return Response(data, status=status.HTTP_201_CREATED)
 
 @swagger_auto_schema(
     method='POST',
@@ -233,20 +231,20 @@ def login_view(request):
     """
     User login API endpoint.
     """
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    # Authenticate user
-    user = authenticate(request, username=username, password=password)
-
-    if user is not None:
-        # User is authenticated, log them in
-        login(request, user)
-        return Response({'success': 'Login successful'}, status=status.HTTP_200_OK)
-    else:
-        # User authentication failed
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
+    serializer = UserLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data
+    user_serializer = UserSerializer(user)
+    refresh_token = RefreshToken.for_user(user)
+    tokens = {
+        'refresh': str(refresh_token),
+        'access': str(refresh_token.access_token)
+    }
+    data = {
+        'user': user_serializer.data,
+        'tokens': tokens
+    }
+    return Response(data, status=status.HTTP_200_OK)
 
 
 def index(request):
