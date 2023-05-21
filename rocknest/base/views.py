@@ -21,6 +21,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -28,29 +29,28 @@ from drf_yasg import openapi
 
 
 
-
 def main(request):
     return render(request,"main.html")
 
 
-@swagger_auto_schema(
-    method='get',
-    operation_description='Get user info',
-    responses={200: openapi.Response('User info', schema=UserSerializer)}
-)
-@api_view(['GET'])
-def get_user_info(request):
-    if request.user.is_authenticated:
-        user = request.user
-        # Customize the data you want to return about the user
-        data = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-        }
-        return Response(data)
-    else:
-        return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
+# @swagger_auto_schema(
+#     method='get',
+#     operation_description='Get user info',
+#     responses={200: openapi.Response('User info', schema=UserSerializer)}
+# )
+# @api_view(['GET'])
+# def get_user_info(request):
+#     if request.user.is_authenticated:
+#         user = request.user
+#         # Customize the data you want to return about the user
+#         data = {
+#             'id': user.id,
+#             'username': user.username,
+#             'email': user.email,
+#         }
+#         return Response(data)
+#     else:
+#         return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
     
 
 
@@ -63,6 +63,7 @@ def get_user_info(request):
 def product_list(request):
     products = Product.objects.all()
     serializer = ProductSerializer(products, many=True)
+
     return Response(serializer.data)
 
 
@@ -87,12 +88,61 @@ def get_product(request, product_id):
 
 @swagger_auto_schema(
     method='get',
-    operation_description='Get list of all products in cart',
-    responses={200: openapi.Response('List of products in carts', schema=OrderSerializer(many=True))}
+    operation_description='Get list of classic products, category == classic',
+    responses={200: openapi.Response('List of products', schema=ProductSerializer(many=True))}
 )
 @api_view(['GET'])
+def get_classic_products(request):
+    products = Product.objects.filter(
+        category="classic",
+
+    )
+    # products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+
+    return Response(serializer.data)
+
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get list of modern products, category == modern',
+    responses={200: openapi.Response('List of products', schema=ProductSerializer(many=True))}
+)
+@api_view(['GET'])
+def get_modern_products(request):
+    products = Product.objects.filter(
+        category="modern",
+
+    )
+    # products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+
+    return Response(serializer.data)
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description='Get cart list',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+
+        },
+        required=['username'],
+    ),
+    responses={
+        201: openapi.Response(description='cart items retrieved successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+
+@api_view(['POST'])
 def cart_list(request):
-    order = Order.objects.get(user=request.user, ordered=False)
+    username = request.data.get('username', None)
+    current_user = get_object_or_404(User, username=username)
+    order = Order.objects.get(user=current_user, ordered=False)
     serializer = OrderSerializer(order)
     return Response(serializer.data)
 
@@ -106,6 +156,7 @@ def cart_list(request):
         properties={
             'id': openapi.Schema(type=openapi.TYPE_INTEGER),
             'qty': openapi.Schema(type=openapi.TYPE_INTEGER),
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
 
         },
         required=['id'],
@@ -119,21 +170,16 @@ def cart_list(request):
 def add_to_cart(request):
     id = request.data.get('id', None)
     qty = request.data.get('qty', None)
+    username = request.data.get('username', None)
 
-    if id:
-        id=int(id)
-    
-    if qty:
-        qty = int(qty)
+    current_user = get_object_or_404(User, username=username)
 
-    
-
+    print(current_user.username)
     product = get_object_or_404(Product, id=id)
-
 
     order_item_qs = OrderItem.objects.filter(
         product=product,
-        user=request.user,
+        user=current_user,
         ordered=False
     )
 
@@ -149,19 +195,19 @@ def add_to_cart(request):
         if qty:
             order_item = OrderItem.objects.create(
             product=product,
-            user=request.user,
+            user=current_user,
             ordered=False,
             quantity=qty
             )           
         else:
             order_item = OrderItem.objects.create(
                 product=product,
-                user=request.user,
+                user=current_user,
                 ordered=False
             )
         order_item.save()
 
-    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    order_qs = Order.objects.filter(user=current_user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
         if not order.items.filter(product__id=order_item.id).exists():
@@ -175,7 +221,7 @@ def add_to_cart(request):
     else:
         ordered_date = timezone.now()
         order = Order.objects.create(
-            user=request.user, ordered_date=ordered_date)
+            user=current_user, ordered_date=ordered_date)
         order.items.add(order_item)
         return Response({'success': 'added to cart successfully'}, status=status.HTTP_201_CREATED)
 
@@ -248,7 +294,7 @@ def login_view(request):
     serializer = UserLoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data
-    login(request, user)
+    # login(request, user)
     user_serializer = UserSerializer(user)
     refresh_token = RefreshToken.for_user(user)
     tokens = {
@@ -259,6 +305,7 @@ def login_view(request):
         'user': user_serializer.data,
         'tokens': tokens
     }
+
     return Response(data, status=status.HTTP_200_OK)
 
 
@@ -280,6 +327,7 @@ class UserLogoutAPIView(GenericAPIView):
             refresh_token = serializer.validated_data["refresh"]
             token = RefreshToken(refresh_token)
             token.blacklist()
+            
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -46,13 +46,16 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
  
     path('products/', views.product_list, name='product-list'),
+    path('products/classic/', views.get_classic_products, name='get_classic_products'),
+    path('products/modern/', views.get_modern_products, name='get_modern_products'),
     path('product/<int:product_id>/', views.get_product, name='get_product'),
+
 
     path('add-to-cart/', views.add_to_cart, name='add-to-cart'),
     path('cart_list/', views.cart_list, name='cart_list'),
-    path('user-info/', views.get_user_info, name='user-info'),
+    # path('user-info/', views.get_user_info, name='user-info'),
 
-    # path('logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
+    path('user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
 
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login_view'),
