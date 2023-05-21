@@ -50,8 +50,10 @@ urlpatterns = [
 
     path('add-to-cart/', views.add_to_cart, name='add-to-cart'),
     path('cart_list/', views.cart_list, name='cart_list'),
-    # path('user-info/', views.get_user_info, name='user-info'),
- 
+    path('user-info/', views.get_user_info, name='user-info'),
+
+    path('logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
+
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login_view'),
 

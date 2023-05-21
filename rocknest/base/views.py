@@ -11,13 +11,16 @@ import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Order, OrderItem, Product
-from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer
+from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny 
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -30,24 +33,27 @@ def main(request):
     return render(request,"main.html")
 
 
-# @swagger_auto_schema(
-#     method='get',
-#     operation_description='Get user info',
-#     responses={200: openapi.Response('User info', schema=UserSerializer)}
-# )
-# @api_view(['GET'])
-# def get_user_info(request):
-#     if request.user.is_authenticated:
-#         user = request.user
-#         # Customize the data you want to return about the user
-#         data = {
-#             'id': user.id,
-#             'username': user.username,
-#             'email': user.email,
-#         }
-#         return Response(data)
-#     else:
-#         return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get user info',
+    responses={200: openapi.Response('User info', schema=UserSerializer)}
+)
+@api_view(['GET'])
+def get_user_info(request):
+    if request.user.is_authenticated:
+        user = request.user
+        # Customize the data you want to return about the user
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+        }
+        return Response(data)
+    else:
+        return Response({"message": "user is not authenticated"}, status=HTTP_400_BAD_REQUEST)    
+    
+
+
 @swagger_auto_schema(
     method='get',
     operation_description='Get list of all products',
@@ -153,7 +159,7 @@ def add_to_cart(request):
         order = order_qs[0]
         if not order.items.filter(product__id=order_item.id).exists():
             order.items.add(order_item)
-            return Response({'success': 'order quantity updated successfully'}, status=status.HTTP_201_CREATED)
+            return Response({'success': 'order updated successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "Invalid request"}, status=HTTP_400_BAD_REQUEST)
 
@@ -226,6 +232,7 @@ def signup(request):
         401: openapi.Response(description='Unauthorized'),
     }
 )
+
 @api_view(['POST'])
 def login_view(request):
     """
@@ -234,6 +241,7 @@ def login_view(request):
     serializer = UserLoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data
+    login(request, user)
     user_serializer = UserSerializer(user)
     refresh_token = RefreshToken.for_user(user)
     tokens = {
@@ -246,6 +254,28 @@ def login_view(request):
     }
     return Response(data, status=status.HTTP_200_OK)
 
+
+
+
+
+class UserLogoutAPIView(GenericAPIView):
+    """
+    An endpoint to logout users.
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LogoutSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            refresh_token = serializer.validated_data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def index(request):
     return render(request, 'checkout.html')

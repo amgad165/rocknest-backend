@@ -3,6 +3,11 @@ from .models import Product , ProductImage , OrderItem ,Order
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+    
 class UserRegisterationSerializer(serializers.ModelSerializer):
     """
     Serializer class to serialize registeration requests and create a new user.
