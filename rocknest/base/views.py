@@ -120,6 +120,13 @@ def add_to_cart(request):
     id = request.data.get('id', None)
     qty = request.data.get('qty', None)
 
+    if id:
+        id=int(id)
+    
+    if qty:
+        qty = int(qty)
+
+    
 
     product = get_object_or_404(Product, id=id)
 
