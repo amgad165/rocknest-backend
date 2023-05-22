@@ -53,6 +53,9 @@ urlpatterns = [
 
     path('add-to-cart/', views.add_to_cart, name='add-to-cart'),
     path('cart_list/', views.cart_list, name='cart_list'),
+    path('update_cart/', views.update_cart, name='update_cart'),
+    path('delete_cart/', views.delete_cart, name='delete_cart'),
+
     # path('user-info/', views.get_user_info, name='user-info'),
 
 

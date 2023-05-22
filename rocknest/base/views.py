@@ -11,7 +11,7 @@ import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Order, OrderItem, Product, Address
-from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
+from .serializers import OrderItemSerializer, ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
@@ -227,7 +227,76 @@ def add_to_cart(request):
 
 
 
+@swagger_auto_schema(
+    method='POST',
+    operation_description='update product quantity in cart',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
 
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            'quantity': openapi.Schema(type=openapi.TYPE_INTEGER),
+
+        },
+        required=['username'],
+    ),
+    responses={
+        201: openapi.Response(description='product quantity in cart updated successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+
+
+@api_view(['POST'])
+def update_cart(request):
+    username = request.data.get('username')
+    product_id = request.data.get('product_id')
+    quantity = request.data.get('quantity')
+
+    try:
+        cart = OrderItem.objects.get(user__username=username,product__id=product_id)
+        cart.quantity = quantity
+        cart.save()
+        serializer = OrderItemSerializer(cart)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except OrderItem.DoesNotExist:
+        return Response({'error': 'Product not found in the cart'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description='delete product from cart',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+
+        },
+        required=['username'],
+    ),
+    responses={
+        201: openapi.Response(description='product quantity in cart updated successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+
+@api_view(['POST'])
+def delete_cart(request):
+    username = request.data.get('username')
+    product_id = request.data.get('product_id')
+
+    try:
+        cart = OrderItem.objects.get(user__username=username, product_id=product_id)
+        cart.delete()
+        return Response({'message': 'Product deleted from the cart'},status=status.HTTP_204_NO_CONTENT)
+    except OrderItem.DoesNotExist:
+        return Response({'error': 'Product not found in the cart'}, status=status.HTTP_404_NOT_FOUND)
+    
 @swagger_auto_schema(
     method='POST',
     operation_description="get user's addrress",
