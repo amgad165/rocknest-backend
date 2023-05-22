@@ -10,7 +10,7 @@ from django.http import JsonResponse
 import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Order, OrderItem, Product, Address
+from .models import Order, OrderItem, Product, Address, Payment
 from .serializers import OrderItemSerializer, ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -398,6 +398,9 @@ def create_or_update_address(request):
         400: openapi.Response(description='Bad request'),
     }
 )
+
+
+
 @api_view(['POST'])
 def signup(request):
     serializer = UserRegisterationSerializer(data=request.data)
@@ -419,6 +422,91 @@ def signup(request):
 
     return Response(data, status=status.HTTP_201_CREATED)
 
+
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description='payment',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['username'],
+    ),
+    responses={
+        201: openapi.Response(description='payment created successfully'),
+        400: openapi.Response(description='Bad request'),
+    }
+)
+
+
+@api_view(['POST'])
+def payment(request):
+    username = request.data.get('username', None)
+
+    current_user = get_object_or_404(User, username=username)
+
+    order = Order.objects.get(user=current_user, ordered=False)
+
+    shipping_address = Address.objects.get(user=current_user)
+
+
+
+    amount = int(order.get_total() * 100)
+
+    try:
+
+            # charge the customer because we cannot charge the token more than once
+        # charge = stripe.Charge.create(
+        #     amount=amount,  # cents
+        #     currency="usd",
+        #     customer=userprofile.stripe_customer_id
+        # )
+        api_key = settings.REVOLUT_MERCHANT_API_SECRET
+        headers = {'Authorization': f'Bearer {api_key}'}
+        payment_data = {
+            'amount': amount,
+            'currency': 'GBP',
+            'description': 'Payment Order'
+        }
+        response = requests.post('https://sandbox-merchant.revolut.com/api/1.0/orders', json=payment_data, headers=headers)
+        if response.ok:
+            payment_response = response.json()
+
+        # create the payment
+        payment = Payment()
+        payment.user = current_user
+        payment.amount = order.get_total()
+        payment.save()
+
+        # assign the payment to the order
+
+        order_items = order.items.all()
+        order_items.update(ordered=True)
+        for item in order_items:
+            item.save()
+
+        order.ordered = True
+        order.payment = payment
+        order.shipping_address = shipping_address
+        # order.ref_code = create_ref_code()
+        order.save()
+
+        return Response({"payment_response":payment_response},status=HTTP_200_OK)
+
+
+    except Exception as e:
+        # send an email to ourselves
+        return Response({"message": "A serious error occurred. We have been notifed."}, status=HTTP_400_BAD_REQUEST)
+
+    return Response({"message": "Invalid data received"}, status=HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 @swagger_auto_schema(
     method='POST',
     operation_description='User login',
@@ -436,6 +524,9 @@ def signup(request):
         401: openapi.Response(description='Unauthorized'),
     }
 )
+
+
+
 
 @api_view(['POST'])
 def login_view(request):

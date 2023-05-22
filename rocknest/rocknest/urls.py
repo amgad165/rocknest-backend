@@ -62,6 +62,7 @@ urlpatterns = [
     path('address/get_address_details/', views.get_address_details, name='get_address_details'),
     path('address/create_or_update_address/', views.create_or_update_address, name='create_or_update_address'),
 
+    path('payment/', views.payment, name='payment'),
 
 
 

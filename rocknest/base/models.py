@@ -49,7 +49,9 @@ class Order(models.Model):
     ordered = models.BooleanField(default=False)
     shipping_address = models.ForeignKey(
         'Address', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
-
+    
+    payment = models.ForeignKey(
+        'Payment', on_delete=models.SET_NULL, blank=True, null=True)
 
     being_delivered = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
@@ -91,6 +93,17 @@ class Address(models.Model):
 
     class Meta:
         verbose_name_plural = 'Addresses'
+
+
+class Payment(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.SET_NULL, blank=True, null=True)
+    amount = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
 
 
 
