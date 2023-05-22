@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product , ProductImage , OrderItem ,Order
+from .models import Product , ProductImage , OrderItem ,Order, Address
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
@@ -94,3 +94,8 @@ class OrderSerializer(serializers.ModelSerializer):
         return obj.get_total()
 
 
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ('id','user', 'first_name', 'last_name', 'address', 'country', 'city', 'phone_number', 'post_code', 'state_region')

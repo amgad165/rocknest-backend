@@ -55,8 +55,14 @@ urlpatterns = [
     path('cart_list/', views.cart_list, name='cart_list'),
     # path('user-info/', views.get_user_info, name='user-info'),
 
-    path('user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
 
+    path('address/get_address_details/', views.get_address_details, name='get_address_details'),
+    path('address/create_or_update_address/', views.create_or_update_address, name='create_or_update_address'),
+
+
+
+
+    path('user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login_view'),
 

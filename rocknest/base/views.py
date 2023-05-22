@@ -10,8 +10,8 @@ from django.http import JsonResponse
 import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Order, OrderItem, Product
-from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer
+from .models import Order, OrderItem, Product, Address
+from .serializers import ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
@@ -228,6 +228,88 @@ def add_to_cart(request):
 
 
 
+@swagger_auto_schema(
+    method='POST',
+    operation_description="get user's addrress",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['username'],
+    ),
+    responses={
+        200: openapi.Response(description='successful'),
+        400: openapi.Response(description='Bad request'),
+        401: openapi.Response(description='Unauthorized'),
+    }
+)
+@api_view(['POST'])
+def get_address_details(request):
+    username = request.data.get('username', None)
+    try:
+        user_address = Address.objects.get(user__username=username)
+        serializer = AddressSerializer(user_address)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Address.DoesNotExist:
+        return Response({'error': 'Address not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+@swagger_auto_schema(
+    method='POST',
+    operation_description="get user's addrress",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'address': openapi.Schema(type=openapi.TYPE_STRING),
+            'country': openapi.Schema(type=openapi.TYPE_STRING),
+            'city': openapi.Schema(type=openapi.TYPE_STRING),
+            'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
+            'post_code': openapi.Schema(type=openapi.TYPE_STRING),
+            'state_region': openapi.Schema(type=openapi.TYPE_STRING),
+
+        },
+        required=['username'],
+    ),
+    responses={
+        200: openapi.Response(description='successful'),
+        400: openapi.Response(description='Bad request'),
+        401: openapi.Response(description='Unauthorized'),
+    }
+)
+@api_view(['POST'])
+def create_or_update_address(request):
+    username = request.data.get('username', None)
+    user = get_object_or_404(User, username=username)
+    address_data = {
+        'user': user.id,
+        'first_name': request.data.get('first_name'),
+        'last_name': request.data.get('last_name'),
+        'address': request.data.get('address'),
+        'country': request.data.get('country'),
+        'city': request.data.get('city'),
+        'phone_number': request.data.get('phone_number'),
+        'post_code': request.data.get('post_code'),
+        'state_region': request.data.get('state_region')
+    }
+
+    try:
+        address = Address.objects.get(user=user)
+        serializer = AddressSerializer(instance=address, data=address_data)
+        
+
+    except Address.DoesNotExist:
+        serializer = AddressSerializer(data=address_data)
+
+    if serializer.is_valid():
+        address = serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
