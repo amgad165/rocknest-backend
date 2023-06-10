@@ -40,7 +40,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index,name='index'),
+    path('', views.create_order,name='create_order'),
     path('order', views.create_order,name='create_order'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
@@ -64,6 +64,7 @@ urlpatterns = [
 
     path('payment/', views.payment, name='payment'),
 
+    path('payment_checkout/', views.payment_checkout, name='payment_checkout'),
 
 
     path('user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),

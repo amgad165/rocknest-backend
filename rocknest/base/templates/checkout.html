@@ -3,14 +3,22 @@
 <head><title>Shop</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <meta charset="utf-8">
+
+<!-- we need to link this -->
 <script src="https://checkout.revolut.com/checkout.js"></script>
 
+<!-- we need to have this script  -->
 <script>!function(e,o,n){var r=e=>{var n={sandbox:"https://sandbox-merchant.revolut.com/embed.js",prod:"https://sandbox-merchant.revolut.com/embed.js",dev:"https://sandbox-merchant.revolut.com/embed.js"},r=o.createElement("script");return r.id="revolut-checkout",r.src=n[e]||n.prod,r.async=!0,o.head.appendChild(r),r},t=function(e,r){return{then:function(t,c){e.onload=function(){t(r())},e.onerror=function(){o.head.removeChild(e),c&&c(new Error(n+" failed to load"))}}}};e[n]=function(o,c){var u=t(r(c||"prod"),(function(){return e[n](o)}));return"function"==typeof Promise?Promise.resolve(u):u},e[n].payments=function(o){var c=t(r(o.mode||"prod"),(function(){return e[n].payments({locale:o.locale||"en",publicToken:o.publicToken||null})}));return"function"==typeof Promise?Promise.resolve(c):c}}(window,document,"RevolutCheckout");
 </script></head>
 <body>
 <h1>Checkout</h1>
   <button id="pay-button">Pay</button>
+
+
+  <!-- the payment api integration script -->
   <script>
+
+    // public id you will get from response
     RevolutCheckout("{{ order.public_id }}").then(function (RC) {
       var payButton = document.getElementById("pay-button");
       // On click open payment pop-up
