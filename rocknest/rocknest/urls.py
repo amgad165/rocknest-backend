@@ -45,31 +45,31 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
  
-    path('products/', views.product_list, name='product-list'),
-    path('products/classic/', views.get_classic_products, name='get_classic_products'),
-    path('products/modern/', views.get_modern_products, name='get_modern_products'),
-    path('product/<int:product_id>/', views.get_product, name='get_product'),
+    path('rocknest/products/', views.product_list, name='product-list'),
+    path('rocknest/products/classic/', views.get_classic_products, name='get_classic_products'),
+    path('rocknest/products/modern/', views.get_modern_products, name='get_modern_products'),
+    path('rocknest/product/<int:product_id>/', views.get_product, name='get_product'),
 
 
-    path('add-to-cart/', views.add_to_cart, name='add-to-cart'),
-    path('cart_list/', views.cart_list, name='cart_list'),
-    path('update_cart/', views.update_cart, name='update_cart'),
-    path('delete_cart/', views.delete_cart, name='delete_cart'),
+    path('rocknest/add-to-cart/', views.add_to_cart, name='add-to-cart'),
+    path('rocknest/cart_list/', views.cart_list, name='cart_list'),
+    path('rocknest/update_cart/', views.update_cart, name='update_cart'),
+    path('rocknest/delete_cart/', views.delete_cart, name='delete_cart'),
 
     # path('user-info/', views.get_user_info, name='user-info'),
 
 
-    path('address/get_address_details/', views.get_address_details, name='get_address_details'),
-    path('address/create_or_update_address/', views.create_or_update_address, name='create_or_update_address'),
+    path('rocknest/address/get_address_details/', views.get_address_details, name='get_address_details'),
+    path('rocknest/address/create_or_update_address/', views.create_or_update_address, name='create_or_update_address'),
 
-    path('payment/', views.payment, name='payment'),
+    path('rocknest/payment/', views.payment, name='payment'),
 
-    path('payment_checkout/', views.payment_checkout, name='payment_checkout'),
+    path('rocknest/payment_checkout/', views.payment_checkout, name='payment_checkout'),
 
 
-    path('user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.login_view, name='login_view'),
+    path('rocknest/user/logout/', views.UserLogoutAPIView.as_view(), name='logout-user'),
+    path('rocknest/signup/', views.signup, name='signup'),
+    path('rocknest/login/', views.login_view, name='login_view'),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
