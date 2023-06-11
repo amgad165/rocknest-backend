@@ -14,14 +14,14 @@ class Product(models.Model):
     dimension = models.CharField(max_length=255)
     price = models.IntegerField()
     category = models.CharField(max_length=255,default='classic')
-    main_image = models.FileField(upload_to='product_images/')    
+    main_image = models.FileField(upload_to='rocknest_images/')    
     
     def __str__(self):
         return self.name
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.FileField(upload_to='product_images/')
+    image = models.FileField(upload_to='rocknest_images/')
 
     def __str__(self):
         return str(self.product) + ' - ' +str(self.image).split('/')[1]
