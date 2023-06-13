@@ -30,7 +30,7 @@ from drf_yasg import openapi
 
 
 def main(request):
-    return render(request,"main.html")
+    return render(request,"index.html")
 
 
 # @swagger_auto_schema(
