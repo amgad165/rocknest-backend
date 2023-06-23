@@ -526,6 +526,8 @@ def payment_checkout(request):
         type=openapi.TYPE_OBJECT,
         properties={
             'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'amount': openapi.Schema(type=openapi.TYPE_NUMBER),
+
         },
         required=['username'],
     ),
@@ -538,12 +540,13 @@ def payment_checkout(request):
 @api_view(['POST'])
 def payment(request):
     username = request.data.get('username', None)
+    amount = request.data.get('amount', None)
 
     current_user = get_object_or_404(User, username=username)
 
     order = Order.objects.get(user=current_user, ordered=False)
 
-    amount = int(order.get_total() * 100)
+    amount = amount * 100
 
     try:
 
