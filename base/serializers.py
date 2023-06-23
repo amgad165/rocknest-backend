@@ -55,7 +55,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class MaterialProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'main_image', 'images']
+        fields = ['id','name', 'description', 'price', 'main_image', 'images']
 
 class MaterialSerializer(serializers.ModelSerializer):
     material_product = serializers.SerializerMethodField()
