@@ -51,6 +51,9 @@ urlpatterns = [
     path('rocknest/products/modern/', views.get_modern_products, name='get_modern_products'),
     path('rocknest/product/<int:product_id>/', views.get_product, name='get_product'),
 
+    path('rocknest/materials/', views.materials_list, name='materials-list'),
+    path('rocknest/material/<int:material_id>', views.get_material, name='get_material'),
+
     path('rocknest/add-to-cart/', views.add_to_cart, name='add-to-cart'),
     path('rocknest/cart_list/', views.cart_list, name='cart_list'),
     path('rocknest/update_cart/', views.update_cart, name='update_cart'),

@@ -10,8 +10,8 @@ from django.http import JsonResponse
 import time
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Order, OrderItem, Product, Address, Payment
-from .serializers import OrderItemSerializer, ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
+from .models import Order, OrderItem, Product, Address, Payment, Material
+from .serializers import MaterialSerializer, OrderItemSerializer, ProductSerializer , OrderSerializer,  UserSerializer , UserRegisterationSerializer , UserLoginSerializer ,LogoutSerializer, AddressSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.contrib.auth import authenticate, login
@@ -67,6 +67,20 @@ def product_list(request):
     return Response(serializer.data)
 
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get list of all materials',
+    responses={200: openapi.Response('List of products', schema=ProductSerializer(many=True))}
+)
+@api_view(['GET'])
+def materials_list(request):
+    materials = Material.objects.all()
+    serializer = MaterialSerializer(materials, many=True)
+
+    return Response(serializer.data)
+
+
 @swagger_auto_schema(
     method='get',
     operation_description='Get a specific product by ID',
@@ -80,6 +94,23 @@ def product_list(request):
 def get_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     serializer = ProductSerializer(product)
+    
+    return JsonResponse(serializer.data)
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get a specific material by ID',
+    responses={
+        200: openapi.Response('Material details', schema=MaterialSerializer()),
+        404: 'Product not found'
+    }
+)
+
+@api_view(['GET'])
+def get_material(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+    serializer = MaterialSerializer(material)
     
     return JsonResponse(serializer.data)
 

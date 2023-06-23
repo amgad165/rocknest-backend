@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product , ProductImage , OrderItem ,Order, Address
+from .models import Product , ProductImage , OrderItem ,Order, Address , Material
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
@@ -52,7 +52,23 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'made_in', 'material', 'estimated_time', 'custom_size', 'dimension', 'price', 'category','main_image' ,'images']
 
 
+class MaterialProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['name', 'description', 'price', 'main_image', 'images']
 
+class MaterialSerializer(serializers.ModelSerializer):
+    material_product = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Material
+        fields = ['material_category', 'finish', 'available_in', 'material_product']
+
+    def get_material_product(self, obj):
+        product = obj.material_product
+        material_product_serializer = MaterialProductSerializer(product)
+        return material_product_serializer.data
+    
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     total_item_price = serializers.SerializerMethodField()

@@ -7,17 +7,27 @@ from django.contrib.auth.models import User
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    made_in = models.CharField(max_length=255)
-    material = models.CharField(max_length=255)
-    estimated_time = models.CharField(max_length=255)
-    custom_size = models.CharField(max_length=255)
-    dimension = models.CharField(max_length=255)
-    price = models.IntegerField()
-    category = models.CharField(max_length=255,default='classic')
-    main_image = models.FileField(upload_to='rocknest_images/')    
+    made_in = models.CharField(max_length=255, null=True, blank=True)
+    material = models.CharField(max_length=255, null=True, blank=True)
+    estimated_time = models.CharField(max_length=255, null=True, blank=True)
+    custom_size = models.CharField(max_length=255, null=True, blank=True)
+    dimension = models.CharField(max_length=255, null=True, blank=True)
+    price = models.IntegerField(null=True, blank=True)
+    category = models.CharField(max_length=255,default='classic',null=True, blank=True)
+    main_image = models.FileField(upload_to='rocknest_images/') 
     
     def __str__(self):
         return self.name
+    
+class Material(models.Model):
+    material_category  = models.CharField(max_length=255)
+    finish  = models.CharField(max_length=255)
+    available_in = models.CharField(max_length=255)
+    material_product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='material_model')
+
+
+    def __str__(self):
+        return self.material_product.name    
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
