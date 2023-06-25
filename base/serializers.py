@@ -55,19 +55,25 @@ class ProductSerializer(serializers.ModelSerializer):
 class MaterialProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id','name', 'description', 'price', 'main_image', 'images']
+        fields = ['id','name', 'description', 'category','price', 'main_image', 'images']
 
 class MaterialSerializer(serializers.ModelSerializer):
-    material_product = serializers.SerializerMethodField()
+    main_image = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    id = serializers.IntegerField(source='material_product.id')
+    name = serializers.CharField(source='material_product.name')
+    description = serializers.CharField(source='material_product.description')
+    price = serializers.IntegerField(source='material_product.price')
 
     class Meta:
         model = Material
-        fields = ['material_category', 'finish', 'available_in', 'material_product']
+        fields = ['id', 'name', 'description', 'price', 'finish', 'available_in', 'main_image', 'images']
 
-    def get_material_product(self, obj):
-        product = obj.material_product
-        material_product_serializer = MaterialProductSerializer(product)
-        return material_product_serializer.data
+    def get_main_image(self, material):
+        return material.material_product.main_image.url if material.material_product else None
+
+    def get_images(self, material):
+        return [image.url for image in material.material_product.images.all()] if material.material_product else []
     
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()

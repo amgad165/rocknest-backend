@@ -239,6 +239,7 @@ def add_to_cart(request):
         order_item.save()
 
     order_qs = Order.objects.filter(user=current_user, ordered=False)
+    
     if order_qs.exists():
         order = order_qs[0]
         if not order.items.filter(product__id=order_item.id).exists():
