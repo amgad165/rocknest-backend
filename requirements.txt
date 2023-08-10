@@ -29,3 +29,4 @@ uritemplate==4.1.1
 urllib3==2.0.3
 django-storages
 boto3
+python-dotenv
