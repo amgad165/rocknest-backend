@@ -78,7 +78,7 @@ def materials_list(request):
     materials = Material.objects.all()
     serializer = MaterialSerializer(materials, many=True)
 
-    return Response(serializer.data)
+    return Response(serializer.data)                                               
 
 
 @swagger_auto_schema(
